@@ -1,2 +1,0 @@
-C:\Users\steph\OneDrive\Documents\Advent of Code\Day 2\Day2\x64\Debug\Day2.exe
-C:\Users\steph\OneDrive\Documents\Advent of Code\Day 1\Day 1 Part 2\Day2\x64\Debug\Day1-Part2.exe
