@@ -1,10 +1,11 @@
 #include <iostream>
+#include <algorithm>
 #include <fstream>
 #include <string>
 #include <map>
 #include <vector>
 #include <sstream>
-#include "Day7Part1.h"
+#include "Day7Part2.h"
 
 using namespace std;
 
@@ -17,10 +18,9 @@ vector<string> split(string const& input)
 }
 
 void directoryBuilder(map<string, int>& directorySize, map<string, string>& childrenDirectories, map<string, string>& parentDirectory,
-	const string &lineRead, bool &listingChildren, string &currentDirectory)
+	const string& lineRead, bool& listingChildren, string& currentDirectory)
 {
 	vector<string> splitLine = split(lineRead);
-
 	if (splitLine[0] == "$")
 	{
 		listingChildren = false;
@@ -62,7 +62,7 @@ void directoryBuilder(map<string, int>& directorySize, map<string, string>& chil
 			{
 				string currentVal = childrenDirectories.at(parentString);
 				childrenDirectories[parentString] = currentVal + " " + parentString + "." + splitLine[1];
-			} 
+			}
 			else
 			{
 				childrenDirectories[parentString] = parentString + "." + splitLine[1];
@@ -87,7 +87,6 @@ void directoryBuilder(map<string, int>& directorySize, map<string, string>& chil
 int finalDirectorySize(const string& key)
 {
 	int tempSize = 0;
-
 	if (childrenDirectories.count(key))
 	{
 		vector<string> childrenDirectoriesVector = split(childrenDirectories.at(key));
@@ -96,35 +95,38 @@ int finalDirectorySize(const string& key)
 			tempSize += finalDirectorySize(y);
 		}
 	}
-	
-	if(directorySize.count(key))
+	if (directorySize.count(key))
 		tempSize += directorySize.at(key);
-
 	return tempSize;
 }
 
 int main() {
-
 	fstream inputfile;
-	string lineRead;	
-
+	string lineRead;
+	const int totalDiskSpace = 70000000;
+	const int neededUnusedSpace = 30000000;
 	inputfile.open("input.txt", ios::in);
-	while (getline(inputfile, lineRead)) 
+	while (getline(inputfile, lineRead))
 	{
 		directoryBuilder(directorySize, childrenDirectories, parentDirectory, lineRead, listingChildren, currentDirectory);
 	}
-
 	for (auto const& x : childrenDirectories)
 	{
 		int finalSize = finalDirectorySize(x.first);
 		directorySize[x.first] = finalSize;
 	}
-
+	auto maxSizeIter = max_element(directorySize.begin(), directorySize.end(), [](const auto &x, const auto &y) {return x.second < y.second;});
+	const int spaceNeeded = abs(totalDiskSpace - maxSizeIter->second - neededUnusedSpace);
+	int extraDeletedSpace = spaceNeeded;
+	int deletedFileSize = 0;
 	for (auto const& x : directorySize)
 	{
-		if (x.second <= 100000)
-			totalSizeSum += x.second;
+		if (x.second > spaceNeeded)
+			if (x.second - spaceNeeded < extraDeletedSpace)
+			{
+				extraDeletedSpace = x.second - spaceNeeded;
+				deletedFileSize = x.second;
+			}
 	}
-
-	return totalSizeSum;
+	return deletedFileSize;
 }
